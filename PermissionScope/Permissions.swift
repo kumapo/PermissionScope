@@ -11,7 +11,6 @@ import CoreLocation
 import AddressBook
 import AVFoundation
 import Photos
-import EventKit
 import CloudKit
 import Accounts
 
@@ -43,10 +42,6 @@ import Accounts
 public typealias requestPermissionUnknownResult = () -> Void
 public typealias requestPermissionShowAlert     = (PermissionType) -> Void
 
-@objc public class EventsPermission: NSObject, Permission {
-    public let type: PermissionType = .Events
-}
-
 @objc public class MicrophonePermission: NSObject, Permission {
     public let type: PermissionType = .Microphone
 }
@@ -57,8 +52,4 @@ public typealias requestPermissionShowAlert     = (PermissionType) -> Void
 
 @objc public class PhotosPermission: NSObject, Permission {
     public let type: PermissionType = .Photos
-}
-
-@objc public class RemindersPermission: NSObject, Permission {
-    public let type: PermissionType = .Reminders
 }

@@ -11,7 +11,6 @@ import CoreLocation
 import AddressBook
 import AVFoundation
 import Photos
-import EventKit
 
 public typealias statusRequestClosure = (status: PermissionStatus) -> Void
 public typealias authClosureType      = (finished: Bool, results: [PermissionResult]) -> Void
@@ -694,80 +693,6 @@ typealias resultsForConfigClosure     = ([PermissionResult]) -> Void
         }
     }
     
-    // MARK: Reminders
-    
-    /**
-    Returns the current permission status for accessing Reminders.
-    
-    - returns: Permission status for the requested type.
-    */
-    public func statusReminders() -> PermissionStatus {
-        let status = EKEventStore.authorizationStatusForEntityType(.Reminder)
-        switch status {
-        case .Authorized:
-            return .Authorized
-        case .Restricted, .Denied:
-            return .Unauthorized
-        case .NotDetermined:
-            return .Unknown
-        }
-    }
-    
-    /**
-    Requests access to Reminders, if necessary.
-    */
-    public func requestReminders() {
-        let status = statusReminders()
-        switch status {
-        case .Unknown:
-            EKEventStore().requestAccessToEntityType(.Reminder,
-                completion: { granted, error in
-                    self.detectAndCallback()
-            })
-        case .Unauthorized:
-            self.showDeniedAlert(.Reminders)
-        default:
-            break
-        }
-    }
-    
-    // MARK: Events
-    
-    /**
-    Returns the current permission status for accessing Events.
-    
-    - returns: Permission status for the requested type.
-    */
-    public func statusEvents() -> PermissionStatus {
-        let status = EKEventStore.authorizationStatusForEntityType(.Event)
-        switch status {
-        case .Authorized:
-            return .Authorized
-        case .Restricted, .Denied:
-            return .Unauthorized
-        case .NotDetermined:
-            return .Unknown
-        }
-    }
-    
-    /**
-    Requests access to Events, if necessary.
-    */
-    public func requestEvents() {
-        let status = statusEvents()
-        switch status {
-        case .Unknown:
-            EKEventStore().requestAccessToEntityType(.Event,
-                completion: { granted, error in
-                    self.detectAndCallback()
-            })
-        case .Unauthorized:
-            self.showDeniedAlert(.Events)
-        default:
-            break
-        }
-    }
-    
     // MARK: Bluetooth
     
     /// Returns whether Bluetooth access was asked before or not.
@@ -1039,10 +964,6 @@ typealias resultsForConfigClosure     = ([PermissionResult]) -> Void
             permissionStatus = statusCamera()
         case .Photos:
             permissionStatus = statusPhotos()
-        case .Reminders:
-            permissionStatus = statusReminders()
-        case .Events:
-            permissionStatus = statusEvents()
         }
         
         // Perform completion
