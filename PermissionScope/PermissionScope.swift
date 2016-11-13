@@ -8,7 +8,6 @@
 
 import UIKit
 import CoreLocation
-import AddressBook
 import AVFoundation
 import Photos
 
