@@ -7,7 +7,6 @@
 //
 
 import Foundation
-import CoreLocation
 import AVFoundation
 import Photos
 import CloudKit
@@ -28,14 +27,6 @@ import Accounts
     public init(notificationCategories: Set<UIUserNotificationCategory>? = nil) {
         self.notificationCategories = notificationCategories
     }
-}
-
-@objc public class LocationWhileInUsePermission: NSObject, Permission {
-    public let type: PermissionType = .LocationInUse
-}
-
-@objc public class LocationAlwaysPermission: NSObject, Permission {
-    public let type: PermissionType = .LocationAlways
 }
 
 public typealias requestPermissionUnknownResult = () -> Void

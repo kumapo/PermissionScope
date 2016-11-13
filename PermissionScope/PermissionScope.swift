@@ -7,7 +7,6 @@
 //
 
 import UIKit
-import CoreLocation
 import AVFoundation
 import Photos
 
@@ -312,8 +311,6 @@ typealias resultsForConfigClosure     = ([PermissionResult]) -> Void
 
         // this is a bit of a mess, eh?
         switch type {
-        case .LocationAlways, .LocationInUse:
-            button.setTitle("Enable \(type.prettyDescription)".localized.uppercaseString, forState: .Normal)
         default:
             button.setTitle("Allow \(type)".localized.uppercaseString, forState: .Normal)
         }
@@ -367,101 +364,7 @@ typealias resultsForConfigClosure     = ([PermissionResult]) -> Void
 
     // MARK: - Status and Requests for each permission
     
-    // MARK: Location
-    
-    /**
-    Returns the current permission status for accessing LocationAlways.
-    
-    - returns: Permission status for the requested type.
-    */
-    public func statusLocationAlways() -> PermissionStatus {
-        guard CLLocationManager.locationServicesEnabled() else { return .Disabled }
 
-        let status = CLLocationManager.authorizationStatus()
-        switch status {
-        case .AuthorizedAlways:
-            return .Authorized
-        case .Restricted, .Denied:
-            return .Unauthorized
-        case .AuthorizedWhenInUse:
-            // Curious why this happens? Details on upgrading from WhenInUse to Always:
-            // [Check this issue](https://github.com/nickoneill/PermissionScope/issues/24)
-            if defaults.boolForKey(Constants.NSUserDefaultsKeys.requestedInUseToAlwaysUpgrade) {
-                return .Unauthorized
-            } else {
-                return .Unknown
-            }
-        case .NotDetermined:
-            return .Unknown
-        }
-    }
-
-    /**
-    Requests access to LocationAlways, if necessary.
-    */
-    public func requestLocationAlways() {
-    	let hasAlwaysKey:Bool = !NSBundle.mainBundle()
-    		.objectForInfoDictionaryKey(Constants.InfoPlistKeys.locationAlways).isNil
-    	assert(hasAlwaysKey, Constants.InfoPlistKeys.locationAlways + " not found in Info.plist.")
-    	
-        let status = statusLocationAlways()
-        switch status {
-        case .Unknown:
-            if CLLocationManager.authorizationStatus() == .AuthorizedWhenInUse {
-                defaults.setBool(true, forKey: Constants.NSUserDefaultsKeys.requestedInUseToAlwaysUpgrade)
-                defaults.synchronize()
-            }
-            locationManager.requestAlwaysAuthorization()
-        case .Unauthorized:
-            self.showDeniedAlert(.LocationAlways)
-        case .Disabled:
-            self.showDisabledAlert(.LocationInUse)
-        default:
-            break
-        }
-    }
-
-    /**
-    Returns the current permission status for accessing LocationWhileInUse.
-    
-    - returns: Permission status for the requested type.
-    */
-    public func statusLocationInUse() -> PermissionStatus {
-        guard CLLocationManager.locationServicesEnabled() else { return .Disabled }
-        
-        let status = CLLocationManager.authorizationStatus()
-        // if you're already "always" authorized, then you don't need in use
-        // but the user can still demote you! So I still use them separately.
-        switch status {
-        case .AuthorizedWhenInUse, .AuthorizedAlways:
-            return .Authorized
-        case .Restricted, .Denied:
-            return .Unauthorized
-        case .NotDetermined:
-            return .Unknown
-        }
-    }
-
-    /**
-    Requests access to LocationWhileInUse, if necessary.
-    */
-    public func requestLocationInUse() {
-    	let hasWhenInUseKey :Bool = !NSBundle.mainBundle()
-    		.objectForInfoDictionaryKey(Constants.InfoPlistKeys.locationWhenInUse).isNil
-    	assert(hasWhenInUseKey, Constants.InfoPlistKeys.locationWhenInUse + " not found in Info.plist.")
-    	
-        let status = statusLocationInUse()
-        switch status {
-        case .Unknown:
-            locationManager.requestWhenInUseAuthorization()
-        case .Unauthorized:
-            self.showDeniedAlert(.LocationInUse)
-        case .Disabled:
-            self.showDisabledAlert(.LocationInUse)
-        default:
-            break
-        }
-    }
 
     // MARK: Notifications
     
@@ -951,10 +854,6 @@ typealias resultsForConfigClosure     = ([PermissionResult]) -> Void
         // Get permission status
         let permissionStatus: PermissionStatus
         switch type {
-        case .LocationAlways:
-            permissionStatus = statusLocationAlways()
-        case .LocationInUse:
-            permissionStatus = statusLocationInUse()
         case .Notifications:
             permissionStatus = statusNotifications()
         case .Microphone:
