@@ -12,7 +12,6 @@ import AddressBook
 import AVFoundation
 import Photos
 import EventKit
-import Contacts
 
 public typealias statusRequestClosure = (status: PermissionStatus) -> Void
 public typealias authClosureType      = (finished: Bool, results: [PermissionResult]) -> Void
@@ -461,62 +460,6 @@ typealias resultsForConfigClosure     = ([PermissionResult]) -> Void
             self.showDeniedAlert(.LocationInUse)
         case .Disabled:
             self.showDisabledAlert(.LocationInUse)
-        default:
-            break
-        }
-    }
-
-    // MARK: Contacts
-    
-    /**
-    Returns the current permission status for accessing Contacts.
-    
-    - returns: Permission status for the requested type.
-    */
-    public func statusContacts() -> PermissionStatus {
-        if #available(iOS 9.0, *) {
-            let status = CNContactStore.authorizationStatusForEntityType(.Contacts)
-            switch status {
-            case .Authorized:
-                return .Authorized
-            case .Restricted, .Denied:
-                return .Unauthorized
-            case .NotDetermined:
-                return .Unknown
-            }
-        } else {
-            // Fallback on earlier versions
-            let status = ABAddressBookGetAuthorizationStatus()
-            switch status {
-            case .Authorized:
-                return .Authorized
-            case .Restricted, .Denied:
-                return .Unauthorized
-            case .NotDetermined:
-                return .Unknown
-            }
-        }
-    }
-
-    /**
-    Requests access to Contacts, if necessary.
-    */
-    public func requestContacts() {
-        let status = statusContacts()
-        switch status {
-        case .Unknown:
-            if #available(iOS 9.0, *) {
-                CNContactStore().requestAccessForEntityType(.Contacts, completionHandler: {
-                    success, error in
-                    self.detectAndCallback()
-                })
-            } else {
-                ABAddressBookRequestAccessWithCompletion(nil) { success, error in
-                    self.detectAndCallback()
-                }
-            }
-        case .Unauthorized:
-            self.showDeniedAlert(.Contacts)
         default:
             break
         }
@@ -1088,8 +1031,6 @@ typealias resultsForConfigClosure     = ([PermissionResult]) -> Void
             permissionStatus = statusLocationAlways()
         case .LocationInUse:
             permissionStatus = statusLocationInUse()
-        case .Contacts:
-            permissionStatus = statusContacts()
         case .Notifications:
             permissionStatus = statusNotifications()
         case .Microphone:

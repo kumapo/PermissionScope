@@ -42,10 +42,6 @@ import Accounts
     public let type: PermissionType = .LocationAlways
 }
 
-@objc public class ContactsPermission: NSObject, Permission {
-    public let type: PermissionType = .Contacts
-}
-
 public typealias requestPermissionUnknownResult = () -> Void
 public typealias requestPermissionShowAlert     = (PermissionType) -> Void
 
