@@ -552,39 +552,6 @@ typealias resultsForConfigClosure     = ([PermissionResult]) -> Void
         }
     }
     
-    // MARK: Bluetooth
-    
-    /// Returns whether Bluetooth access was asked before or not.
-    private var askedBluetooth:Bool {
-        get {
-            return defaults.boolForKey(Constants.NSUserDefaultsKeys.requestedBluetooth)
-        }
-        set {
-            defaults.setBool(newValue, forKey: Constants.NSUserDefaultsKeys.requestedBluetooth)
-            defaults.synchronize()
-        }
-    }
-    
-    /// Returns whether PermissionScope is waiting for the user to enable/disable bluetooth access or not.
-    private var waitingForBluetooth = false
-    
-    
-    // MARK: Core Motion Activity
-    
-    /// Returns whether Bluetooth access was asked before or not.
-    private var askedMotion:Bool {
-        get {
-            return defaults.boolForKey(Constants.NSUserDefaultsKeys.requestedMotion)
-        }
-        set {
-            defaults.setBool(newValue, forKey: Constants.NSUserDefaultsKeys.requestedMotion)
-            defaults.synchronize()
-        }
-    }
-    
-    /// Returns whether PermissionScope is waiting for the user to enable/disable motion access or not.
-    private var waitingForMotion = false
-    
     // MARK: - UI
     
     /**
@@ -600,7 +567,6 @@ typealias resultsForConfigClosure     = ([PermissionResult]) -> Void
         onCancel = cancelled
         
         dispatch_async(dispatch_get_main_queue()) {
-            while self.waitingForBluetooth || self.waitingForMotion { }
             // call other methods that need to wait before show
             // no missing required perms? callback and do nothing
             self.requiredAuthorized({ areAuthorized in
@@ -697,13 +663,7 @@ typealias resultsForConfigClosure     = ([PermissionResult]) -> Void
         }
         return false
     }
-
-    // MARK: Location delegate
     
-    public func locationManager(manager: CLLocationManager, didChangeAuthorizationStatus status: CLAuthorizationStatus) {
-        detectAndCallback()
-    }
-
     // MARK: - UI Helpers
     
     /**
