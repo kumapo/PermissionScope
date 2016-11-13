@@ -474,45 +474,6 @@ typealias resultsForConfigClosure     = ([PermissionResult]) -> Void
             detectAndCallback()
         }
     }
-    
-    // MARK: Camera
-    
-    /**
-    Returns the current permission status for accessing the Camera.
-    
-    - returns: Permission status for the requested type.
-    */
-    public func statusCamera() -> PermissionStatus {
-        let status = AVCaptureDevice.authorizationStatusForMediaType(AVMediaTypeVideo)
-        switch status {
-        case .Authorized:
-            return .Authorized
-        case .Restricted, .Denied:
-            return .Unauthorized
-        case .NotDetermined:
-            return .Unknown
-        }
-    }
-    
-    /**
-    Requests access to the Camera, if necessary.
-    */
-    public func requestCamera() {
-        let status = statusCamera()
-        switch status {
-        case .Unknown:
-            AVCaptureDevice.requestAccessForMediaType(AVMediaTypeVideo,
-                completionHandler: { granted in
-                    self.detectAndCallback()
-            })
-        case .Unauthorized:
-            showDeniedAlert(.Camera)
-        case .Disabled:
-            showDisabledAlert(.Camera)
-        case .Authorized:
-            break
-        }
-    }
 
     // MARK: Photos
     
@@ -773,8 +734,6 @@ typealias resultsForConfigClosure     = ([PermissionResult]) -> Void
         switch type {
         case .Notifications:
             permissionStatus = statusNotifications()
-        case .Camera:
-            permissionStatus = statusCamera()
         case .Photos:
             permissionStatus = statusPhotos()
         }
