@@ -15,7 +15,7 @@ public typealias authClosureType      = (finished: Bool, results: [PermissionRes
 public typealias cancelClosureType    = (results: [PermissionResult]) -> Void
 typealias resultsForConfigClosure     = ([PermissionResult]) -> Void
 
-@objc public class PermissionScope: UIViewController, CLLocationManagerDelegate, UIGestureRecognizerDelegate {
+@objc public class PermissionScope: UIViewController, UIGestureRecognizerDelegate {
 
     // MARK: UI Parameters
     
@@ -55,11 +55,6 @@ typealias resultsForConfigClosure     = ([PermissionResult]) -> Void
     public let contentView = UIView()
 
     // MARK: - Various lazy managers
-    lazy var locationManager:CLLocationManager = {
-        let lm = CLLocationManager()
-        lm.delegate = self
-        return lm
-    }()
     
     /// NSUserDefaults standardDefaults lazy var
     lazy var defaults:NSUserDefaults = {
@@ -480,44 +475,6 @@ typealias resultsForConfigClosure     = ([PermissionResult]) -> Void
         }
     }
     
-    // MARK: Microphone
-    
-    /**
-    Returns the current permission status for accessing the Microphone.
-    
-    - returns: Permission status for the requested type.
-    */
-    public func statusMicrophone() -> PermissionStatus {
-        let recordPermission = AVAudioSession.sharedInstance().recordPermission()
-        switch recordPermission {
-        case AVAudioSessionRecordPermission.Denied:
-            return .Unauthorized
-        case AVAudioSessionRecordPermission.Granted:
-            return .Authorized
-        default:
-            return .Unknown
-        }
-    }
-    
-    /**
-    Requests access to the Microphone, if necessary.
-    */
-    public func requestMicrophone() {
-        let status = statusMicrophone()
-        switch status {
-        case .Unknown:
-            AVAudioSession.sharedInstance().requestRecordPermission({ granted in
-                self.detectAndCallback()
-            })
-        case .Unauthorized:
-            showDeniedAlert(.Microphone)
-        case .Disabled:
-            showDisabledAlert(.Microphone)
-        case .Authorized:
-            break
-        }
-    }
-    
     // MARK: Camera
     
     /**
@@ -856,8 +813,6 @@ typealias resultsForConfigClosure     = ([PermissionResult]) -> Void
         switch type {
         case .Notifications:
             permissionStatus = statusNotifications()
-        case .Microphone:
-            permissionStatus = statusMicrophone()
         case .Camera:
             permissionStatus = statusCamera()
         case .Photos:

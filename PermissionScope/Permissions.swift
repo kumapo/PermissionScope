@@ -32,10 +32,6 @@ import Accounts
 public typealias requestPermissionUnknownResult = () -> Void
 public typealias requestPermissionShowAlert     = (PermissionType) -> Void
 
-@objc public class MicrophonePermission: NSObject, Permission {
-    public let type: PermissionType = .Microphone
-}
-
 @objc public class CameraPermission: NSObject, Permission {
     public let type: PermissionType = .Camera
 }
