@@ -12,7 +12,6 @@ import AddressBook
 import AVFoundation
 import Photos
 import EventKit
-import CoreMotion
 import Contacts
 
 public typealias statusRequestClosure = (status: PermissionStatus) -> Void
@@ -64,10 +63,6 @@ typealias resultsForConfigClosure     = ([PermissionResult]) -> Void
         let lm = CLLocationManager()
         lm.delegate = self
         return lm
-    }()
-    
-    lazy var motionManager:CMMotionActivityManager = {
-        return CMMotionActivityManager()
     }()
     
     /// NSUserDefaults standardDefaults lazy var
@@ -195,7 +190,6 @@ typealias resultsForConfigClosure     = ([PermissionResult]) -> Void
         
         contentView.addSubview(closeButton)
         
-        self.statusMotion() //Added to check motion status on load
     }
     
     /**
@@ -301,10 +295,6 @@ typealias resultsForConfigClosure     = ([PermissionResult]) -> Void
         
         configuredPermissions.append(permission)
         permissionMessages[permission.type] = message
-        
-        if permission.type == .Motion && askedMotion {
-            triggerMotionStatusUpdate()
-        }
     }
 
     /**
@@ -854,62 +844,6 @@ typealias resultsForConfigClosure     = ([PermissionResult]) -> Void
     
     // MARK: Core Motion Activity
     
-    /**
-    Returns the current permission status for accessing Core Motion Activity.
-    
-    - returns: Permission status for the requested type.
-    */
-    public func statusMotion() -> PermissionStatus {
-        if askedMotion {
-            triggerMotionStatusUpdate()
-        }
-        return motionPermissionStatus
-    }
-    
-    /**
-    Requests access to Core Motion Activity, if necessary.
-    */
-    public func requestMotion() {
-        let status = statusMotion()
-        switch status {
-        case .Unauthorized:
-            showDeniedAlert(.Motion)
-        case .Unknown:
-            triggerMotionStatusUpdate()
-        default:
-            break
-        }
-    }
-    
-    /**
-    Prompts motionManager to request a status update. If permission is not already granted the user will be prompted with the system's permission dialog.
-    */
-    private func triggerMotionStatusUpdate() {
-        let tmpMotionPermissionStatus = motionPermissionStatus
-        defaults.setBool(true, forKey: Constants.NSUserDefaultsKeys.requestedMotion)
-        defaults.synchronize()
-        
-        let today = NSDate()
-        motionManager.queryActivityStartingFromDate(today,
-            toDate: today,
-            toQueue: .mainQueue()) { activities, error in
-                if let error = error where error.code == Int(CMErrorMotionActivityNotAuthorized.rawValue) {
-                    self.motionPermissionStatus = .Unauthorized
-                } else {
-                    self.motionPermissionStatus = .Authorized
-                }
-                
-                self.motionManager.stopActivityUpdates()
-                if tmpMotionPermissionStatus != self.motionPermissionStatus {
-                    self.waitingForMotion = false
-                    self.detectAndCallback()
-                }
-        }
-        
-        askedMotion = true
-        waitingForMotion = true
-    }
-    
     /// Returns whether Bluetooth access was asked before or not.
     private var askedMotion:Bool {
         get {
@@ -1168,8 +1102,6 @@ typealias resultsForConfigClosure     = ([PermissionResult]) -> Void
             permissionStatus = statusReminders()
         case .Events:
             permissionStatus = statusEvents()
-        case .Motion:
-            permissionStatus = statusMotion()
         }
         
         // Perform completion
