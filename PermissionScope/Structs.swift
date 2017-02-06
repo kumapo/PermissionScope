@@ -10,7 +10,7 @@ import Foundation
 
 /// Permissions currently supportes by PermissionScope
 @objc public enum PermissionType: Int, CustomStringConvertible {
-    case Notifications, Photos
+    case notifications, photos
     
     public var prettyDescription: String {
         switch self {
@@ -21,39 +21,39 @@ import Foundation
     
     public var description: String {
         switch self {
-        case .Notifications:    return "Notifications"
-        case .Photos:           return "Photos"
+        case .notifications:    return "Notifications"
+        case .photos:           return "Photos"
         }
     }
     
-    static let allValues = [Notifications, Photos]
+    static let allValues = [notifications, photos]
 }
 
 /// Possible statuses for a permission.
 @objc public enum PermissionStatus: Int, CustomStringConvertible {
-    case Authorized, Unauthorized, Unknown, Disabled
+    case authorized, unauthorized, unknown, disabled
     
     public var description: String {
         switch self {
-        case .Authorized:   return "Authorized"
-        case .Unauthorized: return "Unauthorized"
-        case .Unknown:      return "Unknown"
-        case .Disabled:     return "Disabled" // System-level
+        case .authorized:   return "Authorized"
+        case .unauthorized: return "Unauthorized"
+        case .unknown:      return "Unknown"
+        case .disabled:     return "Disabled" // System-level
         }
     }
 }
 
 /// Result for a permission status request.
-@objc public class PermissionResult: NSObject {
-    public let type: PermissionType
-    public let status: PermissionStatus
+@objc open class PermissionResult: NSObject {
+    open let type: PermissionType
+    open let status: PermissionStatus
     
     internal init(type:PermissionType, status:PermissionStatus) {
         self.type   = type
         self.status = status
     }
     
-    override public var description: String {
+    override open var description: String {
         return "\(type) \(status)"
     }
 }

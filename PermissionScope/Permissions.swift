@@ -20,9 +20,9 @@ import Accounts
     var type: PermissionType { get }
 }
 
-@objc public class NotificationsPermission: NSObject, Permission {
-    public let type: PermissionType = .Notifications
-    public let notificationCategories: Set<UIUserNotificationCategory>?
+@objc open class NotificationsPermission: NSObject, Permission {
+    open let type: PermissionType = .notifications
+    open let notificationCategories: Set<UIUserNotificationCategory>?
     
     public init(notificationCategories: Set<UIUserNotificationCategory>? = nil) {
         self.notificationCategories = notificationCategories
@@ -32,6 +32,6 @@ import Accounts
 public typealias requestPermissionUnknownResult = () -> Void
 public typealias requestPermissionShowAlert     = (PermissionType) -> Void
 
-@objc public class PhotosPermission: NSObject, Permission {
-    public let type: PermissionType = .Photos
+@objc open class PhotosPermission: NSObject, Permission {
+    open let type: PermissionType = .photos
 }
