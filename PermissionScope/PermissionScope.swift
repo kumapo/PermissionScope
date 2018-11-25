@@ -52,7 +52,7 @@ typealias resultsForConfigClosure     = ([PermissionResult]) -> Void
     
     // MARK: View hierarchy for custom alert
     let baseView    = UIView()
-    open let contentView = UIView()
+    public let contentView = UIView()
 
     // MARK: - Various lazy managers
     
@@ -138,7 +138,7 @@ typealias resultsForConfigClosure     = ([PermissionResult]) -> Void
 		
         // Set up main view
         view.frame = UIScreen.main.bounds
-        view.autoresizingMask = [UIViewAutoresizing.flexibleHeight, UIViewAutoresizing.flexibleWidth]
+        view.autoresizingMask = [UIView.AutoresizingMask.flexibleHeight, UIView.AutoresizingMask.flexibleWidth]
         view.backgroundColor = UIColor(red:0, green:0, blue:0, alpha:0.7)
         view.addSubview(baseView)
         // Base View
@@ -175,7 +175,7 @@ typealias resultsForConfigClosure     = ([PermissionResult]) -> Void
         contentView.addSubview(bodyLabel)
         
         // close button
-        closeButton.setTitle("Close".localized, for: UIControlState())
+        closeButton.setTitle("Close".localized, for: UIControl.State())
         closeButton.addTarget(self, action: #selector(cancel), for: .touchUpInside)
         closeButton.accessibilityIdentifier = "permissionscope.closeButton"
         
@@ -234,9 +234,9 @@ typealias resultsForConfigClosure     = ([PermissionResult]) -> Void
         closeButton.frame.offsetBy(dx: 105, dy: -((dialogHeight/2)-20))
         closeButton.frame.offsetBy(dx: self.closeOffset.width, dy: self.closeOffset.height)
         if let _ = closeButton.imageView?.image {
-            closeButton.setTitle("", for: UIControlState())
+            closeButton.setTitle("", for: UIControl.State())
         }
-        closeButton.setTitleColor(closeButtonTextColor, for: UIControlState())
+        closeButton.setTitleColor(closeButtonTextColor, for: UIControl.State())
 
         let baseOffset = 95
         var index = 0
@@ -252,13 +252,13 @@ typealias resultsForConfigClosure     = ([PermissionResult]) -> Void
                     let prettyDescription = type.prettyDescription
                     if currentStatus == .authorized {
                         self.setButtonAuthorizedStyle(button)
-                        button.setTitle("Allowed \(prettyDescription)".localized.uppercased(), for: UIControlState())
+                        button.setTitle("Allowed \(prettyDescription)".localized.uppercased(), for: UIControl.State())
                     } else if currentStatus == .unauthorized {
                         self.setButtonUnauthorizedStyle(button)
-                        button.setTitle("Denied \(prettyDescription)".localized.uppercased(), for: UIControlState())
+                        button.setTitle("Denied \(prettyDescription)".localized.uppercased(), for: UIControl.State())
                     } else if currentStatus == .disabled {
                         //                setButtonDisabledStyle(button)
-                        button.setTitle("\(prettyDescription) Disabled".localized.uppercased(), for: UIControlState())
+                        button.setTitle("\(prettyDescription) Disabled".localized.uppercased(), for: UIControl.State())
                     }
                     
                     let label = self.permissionLabels[index]
@@ -297,7 +297,7 @@ typealias resultsForConfigClosure     = ([PermissionResult]) -> Void
     */
     func permissionStyledButton(_ type: PermissionType) -> UIButton {
         let button = UIButton(frame: CGRect(x: 0, y: 0, width: 220, height: 40))
-        button.setTitleColor(permissionButtonTextColor, for: UIControlState())
+        button.setTitleColor(permissionButtonTextColor, for: UIControl.State())
         button.titleLabel?.font = buttonFont
 
         button.layer.borderWidth = permissionButtonΒorderWidth
@@ -307,7 +307,7 @@ typealias resultsForConfigClosure     = ([PermissionResult]) -> Void
         // this is a bit of a mess, eh?
         switch type {
         default:
-            button.setTitle("Allow \(type)".localized.uppercased(), for: UIControlState())
+            button.setTitle("Allow \(type)".localized.uppercased(), for: UIControl.State())
         }
         
         button.addTarget(self, action: Selector("request\(type)"), for: .touchUpInside)
@@ -325,7 +325,7 @@ typealias resultsForConfigClosure     = ([PermissionResult]) -> Void
     func setButtonAuthorizedStyle(_ button: UIButton) {
         button.layer.borderWidth = 0
         button.backgroundColor = authorizedButtonColor
-        button.setTitleColor(.white, for: UIControlState())
+        button.setTitleColor(.white, for: UIControl.State())
     }
     
     /**
@@ -336,7 +336,7 @@ typealias resultsForConfigClosure     = ([PermissionResult]) -> Void
     func setButtonUnauthorizedStyle(_ button: UIButton) {
         button.layer.borderWidth = 0
         button.backgroundColor = unauthorizedButtonColor ?? authorizedButtonColor.inverseColor
-        button.setTitleColor(.white, for: UIControlState())
+        button.setTitleColor(.white, for: UIControl.State())
     }
 
     /**
@@ -391,17 +391,17 @@ typealias resultsForConfigClosure     = ([PermissionResult]) -> Void
     This function is called when we want to show the notifications
     alert, kicking off the entire process.
     */
-    func showingNotificationPermission() {
+    @objc func showingNotificationPermission() {
         let notifCenter = NotificationCenter.default
         
         notifCenter
             .removeObserver(self,
-                            name: NSNotification.Name.UIApplicationWillResignActive,
+                            name: UIApplication.willResignActiveNotification,
                             object: nil)
         notifCenter
             .addObserver(self,
                          selector: #selector(finishedShowingNotificationPermission),
-                         name: NSNotification.Name.UIApplicationDidBecomeActive, object: nil)
+                         name: UIApplication.didBecomeActiveNotification, object: nil)
         notificationTimer?.invalidate()
     }
     
@@ -418,12 +418,12 @@ typealias resultsForConfigClosure     = ([PermissionResult]) -> Void
     See `showingNotificationPermission` for a more detailed description
     of the entire process.
     */
-    func finishedShowingNotificationPermission () {
+    @objc func finishedShowingNotificationPermission () {
         NotificationCenter.default.removeObserver(self,
-            name: NSNotification.Name.UIApplicationWillResignActive,
+            name: UIApplication.willResignActiveNotification,
             object: nil)
         NotificationCenter.default.removeObserver(self,
-            name: NSNotification.Name.UIApplicationDidBecomeActive,
+            name: UIApplication.didBecomeActiveNotification,
             object: nil)
         
         notificationTimer?.invalidate()
@@ -457,7 +457,7 @@ typealias resultsForConfigClosure     = ([PermissionResult]) -> Void
                 .first(where: { $0 is NotificationsPermission }) as? NotificationsPermission
             let notificationsPermissionSet = notificationsPermission?.notificationCategories
 
-            NotificationCenter.default.addObserver(self, selector: #selector(showingNotificationPermission), name: NSNotification.Name.UIApplicationWillResignActive, object: nil)
+            NotificationCenter.default.addObserver(self, selector: #selector(showingNotificationPermission), name: UIApplication.willResignActiveNotification, object: nil)
             
             notificationTimer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(finishedShowingNotificationPermission), userInfo: nil, repeats: false)
             
@@ -629,7 +629,7 @@ typealias resultsForConfigClosure     = ([PermissionResult]) -> Void
     /**
     Called when the users taps on the close button.
     */
-    func cancel() {
+    @objc func cancel() {
         self.hide()
         
         if let onCancel = onCancel {
@@ -661,9 +661,9 @@ typealias resultsForConfigClosure     = ([PermissionResult]) -> Void
         alert.addAction(UIAlertAction(title: "Show me".localized,
             style: .default,
             handler: { action in
-                NotificationCenter.default.addObserver(self, selector: #selector(self.appForegroundedAfterSettings), name: NSNotification.Name.UIApplicationDidBecomeActive, object: nil)
+                NotificationCenter.default.addObserver(self, selector: #selector(self.appForegroundedAfterSettings), name: UIApplication.didBecomeActiveNotification, object: nil)
                 
-                let settingsUrl = URL(string: UIApplicationOpenSettingsURLString)
+                let settingsUrl = URL(string: UIApplication.openSettingsURLString)
                 UIApplication.shared.openURL(settingsUrl!)
         }))
         
@@ -695,9 +695,9 @@ typealias resultsForConfigClosure     = ([PermissionResult]) -> Void
         alert.addAction(UIAlertAction(title: "Show me".localized,
             style: .default,
             handler: { action in
-                NotificationCenter.default.addObserver(self, selector: #selector(self.appForegroundedAfterSettings), name: NSNotification.Name.UIApplicationDidBecomeActive, object: nil)
+                NotificationCenter.default.addObserver(self, selector: #selector(self.appForegroundedAfterSettings), name: UIApplication.didBecomeActiveNotification, object: nil)
                 
-                let settingsUrl = URL(string: UIApplicationOpenSettingsURLString)
+                let settingsUrl = URL(string: UIApplication.openSettingsURLString)
                 UIApplication.shared.openURL(settingsUrl!)
         }))
         
@@ -715,8 +715,8 @@ typealias resultsForConfigClosure     = ([PermissionResult]) -> Void
     button to check on a disabled permission. It calls detectAndCallback
     to recheck all the permissions and update the UI.
     */
-    func appForegroundedAfterSettings() {
-        NotificationCenter.default.removeObserver(self, name: NSNotification.Name.UIApplicationDidBecomeActive, object: nil)
+    @objc func appForegroundedAfterSettings() {
+        NotificationCenter.default.removeObserver(self, name: UIApplication.didBecomeActiveNotification, object: nil)
         
         detectAndCallback()
     }
